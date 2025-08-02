@@ -1,4 +1,4 @@
-export const ChevronIcon = props => (
+export const ChevronIcon = (props) => (
   <svg
     width="24"
     height="24"
@@ -8,4 +8,4 @@ export const ChevronIcon = props => (
   >
     <path d="M15.41 7.41L14 6L8 12L14 18L15.41 16.59L10.83 12L15.41 7.41Z" />
   </svg>
-)
+);

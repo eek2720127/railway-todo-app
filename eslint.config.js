@@ -1,28 +1,20 @@
 // eslint.config.js
 import js from '@eslint/js';
 import globals from 'globals';
+import pluginReact from 'eslint-plugin-react';
+import pluginReactHooks from 'eslint-plugin-react-hooks';
+import pluginImport from 'eslint-plugin-import';
+import pluginPrettier from 'eslint-plugin-prettier';
 
 export default [
   {
-    files: ['src/**/*.{js,jsx}'],
-    languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-      },
-    },
+    // ...
     plugins: {
-      react: require('eslint-plugin-react'),
-      'react-hooks': require('eslint-plugin-react-hooks'),
-      import: require('eslint-plugin-import'),
-      prettier: require('eslint-plugin-prettier'),
+      react: pluginReact,
+      'react-hooks': pluginReactHooks,
+      import: pluginImport,
+      prettier: pluginPrettier,
     },
-    rules: {
-      'prettier/prettier': 'error',
-      'react/jsx-uses-react': 'off',
-      'react/react-in-jsx-scope': 'off',
-    },
+    // ...
   },
 ];
