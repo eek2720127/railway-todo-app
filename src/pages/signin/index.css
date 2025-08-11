@@ -1,47 +1,99 @@
-.signin {
+/* src/pages/signin/index.css */
+
+/* ページ全体のセンタリングと背景 */
+.signin-layout {
   display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-
-  max-width: var(--width-login-form);
-  margin: 0 auto;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: calc(100vh - 0px);
+  background: #f1f5f8; /* 薄いグレー背景 */
+  padding-top: 40px; /* ヘッダー分の余白 */
 }
 
-.signin__error {
-  color: var(--red-500);
+/* 中央カード */
+.signin {
+  width: 420px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 28px 36px;
+  box-shadow: 0 8px 24px rgba(22, 28, 37, 0.06);
 }
 
+/* タイトル */
 .signin__title {
-  color: var(--slate-700);
-  font-size: 2.25rem;
-  line-height: 2.5rem;
+  text-align: center;
+  font-size: 20px;
   font-weight: 700;
+  margin: 0 0 22px;
+  color: #111827;
 }
 
+/* フォーム */
 .signin__form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 14px;
 }
 
+/* フォームフィールド */
 .signin__form_field {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 6px;
 }
 
 .signin__form_label {
-  color: var(--slate-600);
-  font-weight: 500;
+  font-size: 13px;
+  color: #6b7280;
 }
 
+/* 入力 */
+.signin__input {
+  height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #f8fafc;
+  font-size: 14px;
+}
+
+/* ボタンエリア */
 .signin__form_actions {
   display: flex;
-  flex-direction: row;
-  gap: 1rem;
+  justify-content: flex-start;
   align-items: center;
+  margin-top: 8px;
 }
 
 .signin__form_actions_spacer {
-  flex: 1;
+  flex: 0 0 auto;
+}
+
+/* サインインボタン */
+.signin__button {
+  min-width: 110px;
+  background: #334ee6; /* 濃い青 */
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.signin__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Footer link */
+.signin__footer {
+  margin-top: 14px;
+  text-align: left;
+  font-size: 13px;
+}
+
+.signin__footer a {
+  color: #334ee6;
+  text-decoration: none;
 }

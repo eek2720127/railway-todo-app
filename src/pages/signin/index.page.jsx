@@ -1,85 +1,81 @@
-import React, { useCallback, useState } from 'react';
-import { Redirect, Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { useLogin } from '~/hooks/useLogin';
-import { useId } from '~/hooks/useId';
+// src/pages/signin/index.page.jsx
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { login } from '~/store/auth';
 import './index.css';
 
-const SignIn = () => {
-  const auth = useSelector((state) => state.auth.token !== null);
-  const { login } = useLogin();
-
-  const id = useId();
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export default function SignIn() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const isLoggedIn = useSelector((state) => state.auth.token !== null);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const onSubmit = useCallback(
-    (event) => {
-      event.preventDefault();
+  if (isLoggedIn) return <Navigate to="/" replace />;
 
-      setIsSubmitting(true);
-
-      login({ email, password })
-        .catch((err) => {
-          setErrorMessage(err.message);
-        })
-        .finally(() => {
-          setIsSubmitting(false);
-        });
-    },
-    [email, password]
-  );
-
-  if (auth) {
-    return <Redirect to="/" />;
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg(null);
+    setLoading(true);
+    try {
+      await dispatch(login({ email, password })).unwrap();
+      navigate('/', { replace: true });
+    } catch (err) {
+      const msg = err?.message ?? 'ログインに失敗しました';
+      setErrorMsg(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <main className="signin">
-      <h2 className="signin__title">Login</h2>
-      <p className="signin__error">{errorMessage}</p>
-      <form className="signin__form" onSubmit={onSubmit}>
-        <fieldset className="signin__form_field">
-          <label htmlFor={`${id}-email`} className="signin__form_label">
-            E-mail Address
-          </label>
-          <input
-            id={`${id}-email`}
-            type="email"
-            autoComplete="email"
-            className="app_input"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
-        </fieldset>
-        <fieldset className="signin__form_field">
-          <label htmlFor={`${id}-password`} className="signin__form_label">
-            Password
-          </label>
-          <input
-            id={`${id}-password`}
-            type="password"
-            autoComplete="current-password"
-            className="app_input"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </fieldset>
-        <div className="signin__form_actions">
-          <Link className="app_button" data-variant="secondary" to="/signup">
-            Register
-          </Link>
-          <div className="signin__form_actions_spacer"></div>
-          <button type="submit" className="app_button" disabled={isSubmitting}>
-            Login
-          </button>
-        </div>
-      </form>
-    </main>
-  );
-};
+    <div className="signin-layout">
+      <div className="signin">
+        <h2 className="signin__title">サインイン</h2>
 
-export default SignIn;
+        {errorMsg && <div className="signin__error">{errorMsg}</div>}
+
+        <form className="signin__form" onSubmit={handleSubmit}>
+          <div className="signin__form_field">
+            <label className="signin__form_label">メールアドレス</label>
+            <input
+              className="signin__input"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder=""
+              required
+            />
+          </div>
+
+          <div className="signin__form_field">
+            <label className="signin__form_label">パスワード</label>
+            <input
+              className="signin__input"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder=""
+              required
+            />
+          </div>
+
+          <div className="signin__form_actions">
+            <div className="signin__form_actions_spacer" />
+            <button className="signin__button" type="submit" disabled={loading}>
+              {loading ? 'Signing in...' : 'サインイン'}
+            </button>
+          </div>
+        </form>
+
+        <p className="signin__footer">
+          <a href="/signup">新規作成</a>
+        </p>
+      </div>
+    </div>
+  );
+}

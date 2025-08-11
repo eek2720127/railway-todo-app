@@ -11,10 +11,14 @@ export const Sidebar = () => {
   const dispatch = useDispatch();
   const { pathname } = useLocation();
 
-  const lists = useSelector((state) => state.list.lists);
+  // Redux 側の値を取得（null の場合もある）
+  const listsFromState = useSelector((state) => state.list.lists);
   const activeId = useSelector((state) => state.list.current);
   const isLoggedIn = useSelector((state) => state.auth.token !== null);
   const userName = useSelector((state) => state.auth.user?.name);
+
+  // 安全のため、lists が配列でなければ空配列にフォールバックする
+  const listsArray = Array.isArray(listsFromState) ? listsFromState : [];
 
   // リスト新規作成ページではリストをハイライトしない
   const shouldHighlight = !pathname.startsWith('/list/new');
@@ -22,21 +26,23 @@ export const Sidebar = () => {
   const { logout } = useLogout();
 
   useEffect(() => {
+    // fetchLists は内部で state を見て不要ならスキップする実装のはず
     void dispatch(fetchLists());
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className="sidebar">
       <Link to="/">
         <h1 className="sidebar__title">Todos</h1>
       </Link>
+
       {isLoggedIn ? (
         <>
-          {lists && (
+          {listsArray.length > 0 && (
             <div className="sidebar__lists">
               <h2 className="sidebar__lists_title">Lists</h2>
               <ul className="sidebar__lists_items">
-                {lists.map((listItem) => (
+                {listsArray.map((listItem) => (
                   <li key={listItem.id}>
                     <Link
                       data-active={shouldHighlight && listItem.id === activeId}
@@ -57,6 +63,7 @@ export const Sidebar = () => {
               </ul>
             </div>
           )}
+
           <div className="sidebar__spacer" aria-hidden />
           <div className="sidebar__account">
             <p className="sidebar__account_name">{userName}</p>
@@ -70,12 +77,12 @@ export const Sidebar = () => {
           </div>
         </>
       ) : (
-        <>
-          <Link to="/signin" className="sidebar__login">
-            Login
-          </Link>
-        </>
+        <Link to="/signin" className="sidebar__login">
+          Login
+        </Link>
       )}
     </div>
   );
 };
+
+export default Sidebar;

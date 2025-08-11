@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect } from 'react';
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { BackButton } from '~/components/BackButton';
 import './index.css';
@@ -10,7 +10,7 @@ const EditList = () => {
   const id = useId();
 
   const { listId } = useParams();
-  const history = useHistory();
+  const history = useNavigate();
   const dispatch = useDispatch();
 
   const [title, setTitle] = useState('');
