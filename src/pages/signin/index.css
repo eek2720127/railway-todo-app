@@ -6,8 +6,6 @@
   justify-content: center;
   align-items: flex-start;
   min-height: calc(100vh - 0px);
-  background: #f1f5f8; /* 薄いグレー背景 */
-  padding-top: 40px; /* ヘッダー分の余白 */
 }
 
 /* 中央カード */

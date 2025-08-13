@@ -41,7 +41,7 @@ const NewList = () => {
   return (
     <main className="new_list">
       <BackButton />
-      <h2 className="new_list__title">New List</h2>
+      <h2 className="new_list__title">リスト編集</h2>
       <p className="new_list__error">{errorMessage}</p>
       <form className="new_list__form" onSubmit={onSubmit}>
         <fieldset className="new_list__form_field">
@@ -58,11 +58,11 @@ const NewList = () => {
         </fieldset>
         <div className="new_list__form_actions">
           <Link to="/" data-variant="secondary" className="app_button">
-            Cancel
+            削除
           </Link>
           <div className="new_list__form_actions_spacer"></div>
           <button type="submit" className="app_button" disabled={isSubmitting}>
-            Create
+            更新
           </button>
         </div>
       </form>

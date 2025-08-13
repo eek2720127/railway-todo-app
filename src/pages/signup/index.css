@@ -1,47 +1,156 @@
-.signup {
+/* src/pages/signup/index.css */
+
+/* カラーベース */
+:root {
+  --bg: #eef4f8; /* 左側の淡い背景 */
+  --header-bg: #23319b; /* 上部の青帯 */
+  --card-bg: #ffffff;
+  --primary: #334ee6;
+  --muted: #6b7280;
+}
+
+/* ページ全体 */
+.signup-page {
+  min-height: 100vh;
+  background: #fff;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+}
 
-  max-width: var(--width-login-form);
+/* 上部ヘッダー（幅いっぱい） */
+.page-header {
+  width: 100%;
+  background: var(--header-bg);
+  color: #fff;
+  padding: 14px 0;
+  box-sizing: border-box;
+}
+.page-header h1 {
+  max-width: 1200px;
   margin: 0 auto;
-}
-
-.signup__error {
-  color: var(--red-500);
-}
-
-.signup__title {
-  color: var(--slate-700);
-  font-size: 2.25rem;
-  line-height: 2.5rem;
+  padding: 0 20px;
+  font-size: 18px;
   font-weight: 700;
 }
 
-.signup__form {
+/* -------- ここが2カラムレイアウト -------- */
+.signup-container {
+  display: grid;
+  grid-template-columns: 1fr minmax(420px, 540px); /* 左が伸びる、右がフォーム幅 */
+  gap: 0;
+  min-height: calc(100vh - 56px); /* headerを除いた高さ（必要なら調整） */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 左カラム：背景色だけ表示（ブラウザ幅いっぱいに広がる） */
+.signup-left {
+  width: 100%;
+  background: var(--bg);
+  min-height: 100%;
+}
+
+/* 右カラム：カードを右寄せ（中央よりやや右寄せ） */
+.signup-right {
+  display: flex;
+  justify-content: center; /* カードを中央寄せする場合 */
+  align-items: flex-start;
+  padding: 60px 28px; /* 上マージンでカードをヘッダー下へ */
+  box-sizing: border-box;
+}
+
+/* カード */
+.signup-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 28px 36px;
+  box-shadow: 0 8px 24px rgba(22, 28, 37, 0.06);
+  box-sizing: border-box;
+}
+
+/* タイトル */
+.page-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 18px;
+  text-align: center;
+  color: #111827;
+}
+
+/* エラー */
+.error {
+  color: #ef4444;
+  background: #fff5f5;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+/* フォーム */
+.signup-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 14px;
 }
 
-.signup__form_field {
+/* ラベル＆入力 */
+.form-label {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.form-label input {
+  height: 40px;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 14px;
+  box-sizing: border-box;
 }
 
-.signup__form_label {
-  color: var(--slate-600);
-  font-weight: 500;
+/* ボタン */
+.primary-button {
+  margin-top: 8px;
+  height: 42px;
+  width: 100%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.signup__form_actions {
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
-  align-items: center;
+/* フッター（ログインリンク） */
+.muted {
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.muted a {
+  color: var(--primary);
+  text-decoration: none;
 }
 
-.signup__form_actions_spacer {
-  flex: 1;
+/* レスポンシブ：狭い画面では左カラムを隠してカードを中央に */
+@media (max-width: 900px) {
+  .signup-container {
+    grid-template-columns: 1fr; /* 1カラム */
+  }
+  .signup-left {
+    display: none;
+  }
+  .signup-right {
+    padding: 40px 16px;
+  }
+  .signup-card {
+    max-width: 520px;
+    margin: 0 auto;
+  }
 }

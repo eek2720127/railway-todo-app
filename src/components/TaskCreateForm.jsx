@@ -1,46 +1,27 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
+// src/components/TaskCreateForm.jsx
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import './TaskCreateForm.css';
 import { CheckIcon } from '~/icons/CheckIcon';
 import { createTask } from '~/store/task';
 
+// 共通コンポーネント（作っていればこちらを使う）
+import Button from '~/components/ui/Button';
+import TextField from '~/components/ui/TextField';
+
 export const TaskCreateForm = () => {
   const dispatch = useDispatch();
 
   const refForm = useRef(null);
-  const [elemTextarea, setElemTextarea] = useState(null);
+  const textareaRef = useRef(null);
 
   const [formState, setFormState] = useState('initial');
-
   const [title, setTitle] = useState('');
   const [detail, setDetail] = useState('');
   const [done, setDone] = useState(false);
 
-  const handleToggle = useCallback(() => {
-    setDone((prev) => !prev);
-  }, []);
-
-  const handleFocus = useCallback(() => {
-    setFormState('focused');
-  }, []);
-
-  const handleBlur = useCallback(() => {
-    if (title || detail) {
-      return;
-    }
-
-    setTimeout(() => {
-      // フォーム内の要素がフォーカスされている場合は何もしない
-      const formElement = refForm.current;
-      if (formElement && formElement.contains(document.activeElement)) {
-        return;
-      }
-
-      setFormState('initial');
-      setDone(false);
-    }, 100);
-  }, [title, detail]);
-
+  const handleToggle = useCallback(() => setDone((p) => !p), []);
+  const handleFocus = useCallback(() => setFormState('focused'), []);
   const handleDiscard = useCallback(() => {
     setTitle('');
     setDetail('');
@@ -48,10 +29,21 @@ export const TaskCreateForm = () => {
     setDone(false);
   }, []);
 
+  const handleBlur = useCallback(() => {
+    if (title || detail) return;
+
+    setTimeout(() => {
+      const formElement = refForm.current;
+      if (formElement && formElement.contains(document.activeElement)) return;
+
+      setFormState('initial');
+      setDone(false);
+    }, 100);
+  }, [title, detail]);
+
   const onSubmit = useCallback(
     (event) => {
       event.preventDefault();
-
       setFormState('submitting');
 
       void dispatch(createTask({ title, detail, done }))
@@ -60,30 +52,27 @@ export const TaskCreateForm = () => {
           handleDiscard();
         })
         .catch((err) => {
-          alert(err.message);
+          alert(err.message || '送信に失敗しました');
           setFormState('focused');
         });
     },
-    [title, detail, done]
+    [title, detail, done, dispatch, handleDiscard]
   );
 
+  // textarea の自動リサイズ
   useEffect(() => {
-    if (!elemTextarea) {
-      return;
-    }
+    const el = textareaRef.current;
+    if (!el) return;
 
-    const recalcHeight = () => {
-      elemTextarea.style.height = 'auto';
-      elemTextarea.style.height = `${elemTextarea.scrollHeight}px`;
+    const recalc = () => {
+      el.style.height = 'auto';
+      el.style.height = `${el.scrollHeight}px`;
     };
 
-    elemTextarea.addEventListener('input', recalcHeight);
-    recalcHeight();
-
-    return () => {
-      elemTextarea.removeEventListener('input', recalcHeight);
-    };
-  }, [elemTextarea]);
+    el.addEventListener('input', recalc);
+    recalc();
+    return () => el.removeEventListener('input', recalc);
+  }, [textareaRef, detail]);
 
   return (
     <form
@@ -99,36 +88,51 @@ export const TaskCreateForm = () => {
           className="task_create_form__mark_button"
           onFocus={handleFocus}
           onBlur={handleBlur}
+          aria-pressed={done}
+          aria-label={done ? 'Completed' : 'Incomplete'}
         >
           {done ? (
-            <div
-              className="task_create_form__mark____complete"
-              aria-label="Completed"
-            >
+            <div className="task_create_form__mark____complete">
               <CheckIcon className="task_create_form__mark____complete_check" />
             </div>
           ) : (
-            <div
-              className="task_create_form__mark____incomplete"
-              aria-label="Incomplete"
-            ></div>
+            <div className="task_create_form__mark____incomplete" />
           )}
         </button>
-        <input
-          type="text"
-          className="task_create_form__title"
-          placeholder="Add a new task..."
+
+        {/* タイトル入力：共通 TextField を使用（ラベル不要なら label を渡さない） */}
+        <TextField
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          placeholder="Add a new task..."
+          type="text"
+          // この TextField は内部で input を出すので onFocus/onBlur を渡す
           onFocus={handleFocus}
           onBlur={handleBlur}
-          disabled={formState === 'submitting'}
+          required={false}
+          className="task_create_form__title"
         />
       </div>
+
       {formState !== 'initial' && (
         <div>
+          {/* 詳細（textarea）: TextField の multiline を使うか直接 textarea を使う */}
+          <TextField
+            value={detail}
+            onChange={(e) => setDetail(e.target.value)}
+            placeholder="Add a description here..."
+            multiline
+            rows={1}
+            required={false}
+            // textarea の auto-resize のため ref を渡す（TextField が ref を forward していない場合は直接 textarea を使ってください）
+            // ここでは直接 textarea を使った実装にフォールバックします：
+            className="task_create_form__detail_wrapper"
+          />
+
+          {/* もし上の TextField が ref を受け取れるなら textareaRef を渡し、そうでなければ下の native textarea に差し替えてください */}
+          {/* Native textarea（auto-resize 用 ref を直接セット） */}
           <textarea
-            ref={setElemTextarea}
+            ref={textareaRef}
             rows={1}
             className="task_create_form__detail"
             placeholder="Add a description here..."
@@ -137,29 +141,32 @@ export const TaskCreateForm = () => {
             onBlur={handleBlur}
             disabled={formState === 'submitting'}
           />
+
           <div className="task_create_form__actions">
-            <button
+            <Button
               type="button"
-              className="app_button"
-              data-variant="secondary"
-              onBlur={handleBlur}
+              variant="secondary"
               onClick={handleDiscard}
+              onBlur={handleBlur}
               disabled={(!title && !detail) || formState === 'submitting'}
             >
               Discard
-            </button>
-            <div className="task_create_form__spacer"></div>
-            <button
+            </Button>
+
+            <div className="task_create_form__spacer" />
+
+            <Button
               type="submit"
-              className="app_button"
-              onBlur={handleBlur}
+              variant="primary"
               disabled={!title || !detail || formState === 'submitting'}
             >
               Add
-            </button>
+            </Button>
           </div>
         </div>
       )}
     </form>
   );
 };
+
+export default TaskCreateForm;
