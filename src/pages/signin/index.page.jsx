@@ -1,36 +1,36 @@
 // src/pages/signin/index.page.jsx
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Navigate, useNavigate } from 'react-router-dom';
-import { login } from '~/store/auth';
-import './index.css';
+import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { Navigate, useNavigate } from 'react-router-dom'
+import { login } from '~/store/auth'
+import './index.css'
 
 export default function SignIn() {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const isLoggedIn = useSelector((state) => state.auth.token !== null);
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const isLoggedIn = useSelector((state) => state.auth.token !== null)
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMsg, setErrorMsg] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [errorMsg, setErrorMsg] = useState(null)
+  const [loading, setLoading] = useState(false)
 
-  if (isLoggedIn) return <Navigate to="/" replace />;
+  if (isLoggedIn) return <Navigate to="/" replace />
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErrorMsg(null);
-    setLoading(true);
+    e.preventDefault()
+    setErrorMsg(null)
+    setLoading(true)
     try {
-      await dispatch(login({ email, password })).unwrap();
-      navigate('/', { replace: true });
+      await dispatch(login({ email, password })).unwrap()
+      navigate('/', { replace: true })
     } catch (err) {
-      const msg = err?.message ?? 'ログインに失敗しました';
-      setErrorMsg(msg);
+      const msg = err?.message ?? 'ログインに失敗しました'
+      setErrorMsg(msg)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="signin-layout">
@@ -77,5 +77,5 @@ export default function SignIn() {
         </p>
       </div>
     </div>
-  );
+  )
 }

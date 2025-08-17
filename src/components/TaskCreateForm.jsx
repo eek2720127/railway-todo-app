@@ -1,78 +1,78 @@
 // src/components/TaskCreateForm.jsx
-import React, { useCallback, useEffect, useState, useRef } from 'react';
-import { useDispatch } from 'react-redux';
-import './TaskCreateForm.css';
-import { CheckIcon } from '~/icons/CheckIcon';
-import { createTask } from '~/store/task';
+import React, { useCallback, useEffect, useState, useRef } from 'react'
+import { useDispatch } from 'react-redux'
+import './TaskCreateForm.css'
+import { CheckIcon } from '~/icons/CheckIcon'
+import { createTask } from '~/store/task'
 
 // 共通コンポーネント（作っていればこちらを使う）
-import Button from '~/components/ui/Button';
-import TextField from '~/components/ui/TextField';
+import Button from '~/components/ui/Button'
+import TextField from '~/components/ui/TextField'
 
 export const TaskCreateForm = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
 
-  const refForm = useRef(null);
-  const textareaRef = useRef(null);
+  const refForm = useRef(null)
+  const textareaRef = useRef(null)
 
-  const [formState, setFormState] = useState('initial');
-  const [title, setTitle] = useState('');
-  const [detail, setDetail] = useState('');
-  const [done, setDone] = useState(false);
+  const [formState, setFormState] = useState('initial')
+  const [title, setTitle] = useState('')
+  const [detail, setDetail] = useState('')
+  const [done, setDone] = useState(false)
 
-  const handleToggle = useCallback(() => setDone((p) => !p), []);
-  const handleFocus = useCallback(() => setFormState('focused'), []);
+  const handleToggle = useCallback(() => setDone((p) => !p), [])
+  const handleFocus = useCallback(() => setFormState('focused'), [])
   const handleDiscard = useCallback(() => {
-    setTitle('');
-    setDetail('');
-    setFormState('initial');
-    setDone(false);
-  }, []);
+    setTitle('')
+    setDetail('')
+    setFormState('initial')
+    setDone(false)
+  }, [])
 
   const handleBlur = useCallback(() => {
-    if (title || detail) return;
+    if (title || detail) return
 
     setTimeout(() => {
-      const formElement = refForm.current;
-      if (formElement && formElement.contains(document.activeElement)) return;
+      const formElement = refForm.current
+      if (formElement && formElement.contains(document.activeElement)) return
 
-      setFormState('initial');
-      setDone(false);
-    }, 100);
-  }, [title, detail]);
+      setFormState('initial')
+      setDone(false)
+    }, 100)
+  }, [title, detail])
 
   const onSubmit = useCallback(
     (event) => {
-      event.preventDefault();
-      setFormState('submitting');
+      event.preventDefault()
+      setFormState('submitting')
 
       void dispatch(createTask({ title, detail, done }))
         .unwrap()
         .then(() => {
-          handleDiscard();
+          handleDiscard()
         })
         .catch((err) => {
-          alert(err.message || '送信に失敗しました');
-          setFormState('focused');
-        });
+          alert(err.message || '送信に失敗しました')
+          setFormState('focused')
+        })
     },
     [title, detail, done, dispatch, handleDiscard]
-  );
+  )
 
   // textarea の自動リサイズ
   useEffect(() => {
-    const el = textareaRef.current;
-    if (!el) return;
+    const el = textareaRef.current
+    if (!el) return
 
     const recalc = () => {
-      el.style.height = 'auto';
-      el.style.height = `${el.scrollHeight}px`;
-    };
+      el.style.height = 'auto'
+      el.style.height = `${el.scrollHeight}px`
+    }
 
-    el.addEventListener('input', recalc);
-    recalc();
-    return () => el.removeEventListener('input', recalc);
-  }, [textareaRef, detail]);
+    el.addEventListener('input', recalc)
+    recalc()
+    return () => el.removeEventListener('input', recalc)
+  }, [textareaRef, detail])
 
   return (
     <form
@@ -166,7 +166,7 @@ export const TaskCreateForm = () => {
         </div>
       )}
     </form>
-  );
-};
+  )
+}
 
-export default TaskCreateForm;
+export default TaskCreateForm

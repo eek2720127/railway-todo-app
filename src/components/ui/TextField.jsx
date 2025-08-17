@@ -1,6 +1,6 @@
 // src/components/ui/TextField.jsx
-import React, { forwardRef } from 'react';
-import './TextField.css';
+import React, { forwardRef } from 'react'
+import './TextField.css'
 
 /**
  * Props:
@@ -31,7 +31,7 @@ const TextField = forwardRef(
     },
     ref
   ) => {
-    const inputId = id || `tf-${Math.random().toString(36).slice(2, 9)}`;
+    const inputId = id || `tf-${Math.random().toString(36).slice(2, 9)}`
 
     return (
       <div className={`tf ${className}`}>
@@ -69,8 +69,8 @@ const TextField = forwardRef(
 
         {error && <div className="tf__error">{error}</div>}
       </div>
-    );
+    )
   }
-);
+)
 
-export default TextField;
+export default TextField

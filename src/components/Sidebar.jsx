@@ -1,34 +1,34 @@
-import { ListIcon } from '~/icons/ListIcon';
-import './Sidebar.css';
-import { Link, useLocation } from 'react-router-dom';
-import { PlusIcon } from '~/icons/PlusIcon';
-import { useSelector, useDispatch } from 'react-redux';
-import { useLogout } from '~/hooks/useLogout';
-import { useEffect } from 'react';
-import { fetchLists } from '~/store/list/index';
+import { ListIcon } from '~/icons/ListIcon'
+import './Sidebar.css'
+import { Link, useLocation } from 'react-router-dom'
+import { PlusIcon } from '~/icons/PlusIcon'
+import { useSelector, useDispatch } from 'react-redux'
+import { useLogout } from '~/hooks/useLogout'
+import { useEffect } from 'react'
+import { fetchLists } from '~/store/list/index'
 
 export const Sidebar = () => {
-  const dispatch = useDispatch();
-  const { pathname } = useLocation();
+  const dispatch = useDispatch()
+  const { pathname } = useLocation()
 
   // Redux 側の値を取得（null の場合もある）
-  const listsFromState = useSelector((state) => state.list.lists);
-  const activeId = useSelector((state) => state.list.current);
-  const isLoggedIn = useSelector((state) => state.auth.token !== null);
-  const userName = useSelector((state) => state.auth.user?.name);
+  const listsFromState = useSelector((state) => state.list.lists)
+  const activeId = useSelector((state) => state.list.current)
+  const isLoggedIn = useSelector((state) => state.auth.token !== null)
+  const userName = useSelector((state) => state.auth.user?.name)
 
   // 安全のため、lists が配列でなければ空配列にフォールバックする
-  const listsArray = Array.isArray(listsFromState) ? listsFromState : [];
+  const listsArray = Array.isArray(listsFromState) ? listsFromState : []
 
   // リスト新規作成ページではリストをハイライトしない
-  const shouldHighlight = !pathname.startsWith('/list/new');
+  const shouldHighlight = !pathname.startsWith('/list/new')
 
-  const { logout } = useLogout();
+  const { logout } = useLogout()
 
   useEffect(() => {
     // fetchLists は内部で state を見て不要ならスキップする実装のはず
-    void dispatch(fetchLists());
-  }, [dispatch]);
+    void dispatch(fetchLists())
+  }, [dispatch])
 
   return (
     <div className="sidebar">
@@ -82,7 +82,7 @@ export const Sidebar = () => {
         </Link>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar

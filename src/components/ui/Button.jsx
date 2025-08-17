@@ -1,5 +1,5 @@
-import React from 'react';
-import './Button.css';
+import React from 'react'
+import './Button.css'
 
 export function Button({
   children,
@@ -11,7 +11,7 @@ export function Button({
   className = '',
   ...rest
 }) {
-  const cls = `btn btn--${variant} btn--${size} ${disabled ? 'btn--disabled' : ''} ${className}`;
+  const cls = `btn btn--${variant} btn--${size} ${disabled ? 'btn--disabled' : ''} ${className}`
   return (
     <button
       type={type}
@@ -22,7 +22,7 @@ export function Button({
     >
       {children}
     </button>
-  );
+  )
 }
 
-export default Button;
+export default Button

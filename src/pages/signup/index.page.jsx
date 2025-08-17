@@ -1,13 +1,32 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { signup } from '~/store/auth';
-import TextField from '~/components/ui/TextField';
-import Button from '~/components/ui/Button';
-import './index.css';
+import React, { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { signup } from '~/store/auth'
+import TextField from '~/components/ui/TextField'
+import Button from '~/components/ui/Button'
+import './index.css'
 
 export default function SignUp() {
-  // ... state, handleSubmit as before ...
+  const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    try {
+      await dispatch(signup({ email, name, password }))
+      navigate('/login')
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="signup-page">
@@ -55,9 +74,14 @@ export default function SignUp() {
                 {loading ? '登録中...' : '作成'}
               </Button>
             </form>
+
+            <p className="signup-link">
+              すでにアカウントをお持ちの方は{' '}
+              <Link to="/signin">ログインはこちら</Link>
+            </p>
           </div>
         </div>
       </main>
     </div>
-  );
+  )
 }
