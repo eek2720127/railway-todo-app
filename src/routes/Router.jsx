@@ -1,5 +1,4 @@
 // src/Router.jsx
-import React from 'react'
 import { useSelector } from 'react-redux'
 import {
   BrowserRouter,
@@ -19,7 +18,6 @@ import EditList from '~/pages/lists/[listId]/edit/index.page'
 import ListIndex from '~/pages/lists/[listId]/index.page'
 
 const RouterWrapper = () => {
-  // useLocation をここで使って Sidebar の表示制御
   const location = useLocation()
   const hideSidebarFor = ['/signin', '/signup']
   const showSidebar = !hideSidebarFor.includes(location.pathname)
@@ -29,7 +27,7 @@ const RouterWrapper = () => {
       {showSidebar ? (
         <Sidebar />
       ) : (
-        // サイドバーを表示しない代わりに上部ヘッダーを表示したければここに追加
+        // サイドバーを表示しない代わりに上部ヘッダーを表示
         <header className="top-header">
           <div className="top-header__inner">
             <h1>Todoアプリ</h1>
