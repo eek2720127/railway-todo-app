@@ -9,6 +9,8 @@ export function Button({
   size = 'md', // 'sm' | 'md' | 'lg'
   disabled = false,
   className = '',
+  icon,
+  iconposition = 'left',
   ...rest
 }) {
   const cls = `btn btn--${variant} btn--${size} ${disabled ? 'btn--disabled' : ''} ${className}`
@@ -20,7 +22,9 @@ export function Button({
       disabled={disabled}
       {...rest}
     >
+      {icon && iconposition === 'left' ? icon : null}
       {children}
+      {icon && iconposition === 'right' ? icon : null}
     </button>
   )
 }

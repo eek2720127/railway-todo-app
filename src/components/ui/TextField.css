@@ -1,32 +1,47 @@
 /* src/components/ui/TextField.css */
+
+/* 共通のラッパー */
 .tf {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  margin-bottom: 1rem; /* components/TextField.css から移植 */
 }
+
+/* ラベル */
 .tf__label {
-  font-size: 13px;
-  color: #6b7280;
+  font-size: 14px; /* 13px → 14px に統一 */
+  font-weight: 500; /* components/TextField.css から移植 */
+  color: #333; /* より濃い色に統一 */
+  margin-bottom: 0.5rem; /* components/TextField.css より */
 }
+
+/* 入力コントロール */
 .tf__control {
   height: 40px;
-  padding: 8px 10px;
-  border: 1px solid #d1d5db;
+  padding: 0.5rem 0.75rem; /* 統一 */
+  border: 1px solid #ccc; /* 薄いグレーに統一 */
   border-radius: 6px;
   background: #fff;
   font-size: 14px;
   box-sizing: border-box;
+  transition: border-color 0.2s ease; /* components/TextField.css から移植 */
 }
+
 .tf__control:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(51, 78, 230, 0.08);
-  border-color: #334ee6;
+  border-color: #007bff; /* 青系に統一 */
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15); /* 視認性UP */
 }
+
+/* エラー表示 */
 .tf__error {
   color: #ef4444;
   font-size: 13px;
   margin-top: 4px;
 }
+
+/* textarea 用 */
 .tf textarea.tf__control {
   min-height: 80px;
   height: auto;

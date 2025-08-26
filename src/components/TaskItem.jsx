@@ -1,58 +1,29 @@
-import { useState, useCallback } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
-import { PencilIcon } from '~/icons/PencilIcon'
-import { CheckIcon } from '~/icons/CheckIcon'
-import { updateTask } from '~/store/task'
-import './TaskItem.css'
-
 export const TaskItem = ({ task }) => {
-  const dispatch = useDispatch()
+  const deadline = new Date(task.limit)
+  const now = new Date()
 
-  const { listId } = useParams()
-  const { id, title, detail, done } = task
+  const diffMs = deadline - now
+  const diffMinutes = Math.floor(diffMs / 1000 / 60)
+  const diffHours = Math.floor(diffMinutes / 60)
+  const diffDays = Math.floor(diffHours / 24)
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const handleToggle = useCallback(() => {
-    setIsSubmitting(true)
-    void dispatch(updateTask({ id, done: !done })).finally(() => {
-      setIsSubmitting(false)
-    })
-  }, [id, done])
+  let remaining = ''
+  if (diffMs <= 0) {
+    remaining = '期限切れ'
+  } else if (diffDays > 0) {
+    remaining = `${diffDays}日 ${diffHours % 24}時間`
+  } else if (diffHours > 0) {
+    remaining = `${diffHours}時間 ${diffMinutes % 60}分`
+  } else {
+    remaining = `${diffMinutes}分`
+  }
 
   return (
     <div className="task_item">
-      <div className="task_item__title_container">
-        <button
-          type="button"
-          onClick={handleToggle}
-          disabled={isSubmitting}
-          className="task__item__mark_button"
-        >
-          {done ? (
-            <div className="task_item__mark____complete" aria-label="Completed">
-              <CheckIcon className="task_item__mark____complete_check" />
-            </div>
-          ) : (
-            <div
-              className="task_item__mark____incomplete"
-              aria-label="Incomplete"
-            ></div>
-          )}
-        </button>
-        <div className="task_item__title" data-done={done}>
-          {title}
-        </div>
-        <div aria-hidden className="task_item__title_spacer"></div>
-        <Link
-          to={`/lists/${listId}/tasks/${id}`}
-          className="task_item__title_action"
-        >
-          <PencilIcon aria-label="Edit" />
-        </Link>
-      </div>
-      <div className="task_item__detail">{detail}</div>
+      <h3>{task.title}</h3>
+      <p>{task.description}</p>
+      <p>期限: {deadline.toLocaleString()}</p>
+      <p>残り: {remaining}</p>
     </div>
   )
 }
