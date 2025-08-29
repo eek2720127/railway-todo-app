@@ -1,122 +1,77 @@
-// src/components/TaskItem.jsx
-import React, { useEffect, useMemo, useState } from 'react'
+// src/components/TaskItem.jsx (差分：モーダル対応)
+import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { updateTask, deleteTask } from '~/store/task'
+import Modal from './Modal'
 import TaskEditForm from './TaskEditForm'
 import './TaskItem.css'
 
-const pad2 = (n) => String(n).padStart(2, '0')
-
-function formatLocalDateTime(isoString) {
-  // 表示フォーマット: YYYY-MM-DD HH:MM
-  try {
-    const d = new Date(isoString)
-    if (Number.isNaN(d.getTime())) return ''
-    const y = d.getFullYear()
-    const m = pad2(d.getMonth() + 1)
-    const day = pad2(d.getDate())
-    const hh = pad2(d.getHours())
-    const mm = pad2(d.getMinutes())
-    return `${y}-${m}-${day} ${hh}:${mm}`
-  } catch {
-    return ''
-  }
-}
-
-function computeRemaining(isoString) {
-  if (!isoString) return null
-  const target = Date.parse(isoString)
-  if (Number.isNaN(target)) return null
-  const diff = target - Date.now() // ms
-  const isPast = diff < 0
-  let remaining = Math.abs(diff)
-
-  const days = Math.floor(remaining / (1000 * 60 * 60 * 24))
-  remaining -= days * 1000 * 60 * 60 * 24
-  const hours = Math.floor(remaining / (1000 * 60 * 60))
-  remaining -= hours * 1000 * 60 * 60
-  const minutes = Math.floor(remaining / (1000 * 60))
-
-  return {
-    isPast,
-    days,
-    hours,
-    minutes,
-  }
-}
-
-const RemainingText = ({ limit }) => {
-  const [tick, setTick] = useState(0)
-
-  useEffect(() => {
-    // update every 30s to keep minute-accuracy (minutely is required)
-    const id = setInterval(() => setTick((t) => t + 1), 30 * 1000)
-    return () => clearInterval(id)
-  }, [])
-
-  const rem = useMemo(() => computeRemaining(limit), [limit, tick])
-
-  if (!rem) return null
-
-  const { isPast, days, hours, minutes } = rem
-  const parts = []
-  if (days > 0) parts.push(`${days}日`)
-  if (hours > 0) parts.push(`${hours}時間`)
-  parts.push(`${minutes}分`)
-
-  return (
-    <span className={`task-remaining ${isPast ? 'expired' : 'ok'}`}>
-      {isPast ? '期限切れ: ' : '残り: '}
-      {parts.join('')}
-    </span>
-  )
-}
-
 const TaskItem = ({ task }) => {
   const dispatch = useDispatch()
-  const [isEditing, setIsEditing] = React.useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const handleOpenEdit = () => setIsEditing(true)
+  const handleCloseEdit = () => setIsEditing(false)
 
   const handleSave = async (payload) => {
-    // payload must include id, title, detail, done, maybe limit
-    await dispatch(updateTask(payload))
-      .unwrap?.()
-      .catch(() => {})
-    setIsEditing(false)
+    // payload should include id, title, detail, done, maybe limit
+    setLoading(true)
+    try {
+      // unwrap to catch reject
+      await dispatch(updateTask(payload)).unwrap()
+      // success -> close modal
+      handleCloseEdit()
+    } catch (err) {
+      console.error('update failed', err)
+      // show error to user if desired
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleDelete = async () => {
     if (!confirm('削除してよいですか？')) return
-    await dispatch(deleteTask({ id: task.id }))
-      .unwrap?.()
-      .catch(() => {})
+    setLoading(true)
+    try {
+      await dispatch(deleteTask({ id: task.id })).unwrap()
+      // success -> close modal if open
+      handleCloseEdit()
+    } catch (err) {
+      console.error('delete failed', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <div className="task_item">
-      {!isEditing ? (
-        <>
-          <div className="task_item__main">
-            <div className="task_item__title">{task.title}</div>
-            <div className="task_item__detail">{task.detail}</div>
-            {task.limit && (
-              <div className="task_item__limit">
-                期限: {formatLocalDateTime(task.limit)}{' '}
-                <RemainingText limit={task.limit} />
-              </div>
-            )}
-          </div>
+      <div className="task_item__main">
+        <div className="task_item__title">{task.title}</div>
+        <div className="task_item__detail">{task.detail}</div>
+        {task.limit && (
+          <div className="task_item__limit">期限: {task.limit}</div>
+        )}
+      </div>
 
-          <div className="task_item__actions">
-            <button onClick={() => setIsEditing(true)}>編集</button>
-            <button onClick={handleDelete}>削除</button>
-          </div>
-        </>
-      ) : (
-        <TaskEditForm
-          task={task}
-          onSave={handleSave}
-          onCancel={() => setIsEditing(false)}
-        />
+      <div className="task_item__actions">
+        <button onClick={handleOpenEdit}>編集</button>
+        <button onClick={handleDelete}>削除</button>
+      </div>
+
+      {isEditing && (
+        <Modal
+          onClose={handleCloseEdit}
+          ariaLabelledBy={`task-edit-${task.id}-title`}
+        >
+          <h2 id={`task-edit-${task.id}-title`}>タスクを編集</h2>
+          <TaskEditForm
+            task={task}
+            onSave={handleSave}
+            onCancel={handleCloseEdit}
+          />
+          {/* TaskEditForm は onSave（payload）を期待、内部で dispatch せず親で dispatch する設計でも可 */}
+        </Modal>
       )}
     </div>
   )

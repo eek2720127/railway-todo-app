@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import TextField from './ui/TextField'
 import Button from './ui/Button'
-import './TaskCreateForm.css' // ← 正しいファイル名に修正
+import './TaskCreateForm.css'
 
 const TaskCreateForm = ({ onSubmit }) => {
   const [title, setTitle] = useState('')
@@ -11,6 +11,7 @@ const TaskCreateForm = ({ onSubmit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+
     if (!title.trim()) {
       alert('タイトルは必須です')
       return
@@ -18,16 +19,20 @@ const TaskCreateForm = ({ onSubmit }) => {
 
     const taskData = {
       title: title.trim(),
-      detail: description || '',
+      // detail が空なら既定値を入れる（A の方法）
+      detail:
+        description && description.trim() ? description.trim() : '（詳細なし）',
       done: false,
     }
 
     if (limit) {
-      // datetime-local -> ISO with Z
       taskData.limit = new Date(limit).toISOString()
     }
 
-    onSubmit?.(taskData) // 安全呼び出し
+    if (typeof onSubmit === 'function') {
+      onSubmit(taskData)
+    }
+
     setTitle('')
     setDescription('')
     setLimit('')

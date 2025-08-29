@@ -1,0 +1,88 @@
+/* src/components/TaskEditForm.css */
+
+/* フォーム全体 */
+.task-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  max-width: 720px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 入力項目（TextFieldのスタイルと合わせる） */
+.task-edit-form .tf {
+  margin-bottom: 0;
+}
+
+.task-edit-form input[type='datetime-local'],
+.task-edit-form input[type='text'],
+.task-edit-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ボタン群 */
+.task-edit-form .form-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+/* 保存ボタン */
+.btn--save {
+  background: #10b981; /* エメラルドグリーン */
+  color: #fff;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.15);
+}
+
+.btn--save:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+/* キャンセルボタン */
+.btn--cancel {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn--cancel:hover {
+  background: #e5e7eb;
+}
+
+/* エラー表示 */
+.task-edit-form .error {
+  color: #ef4444;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 480px) {
+  .task-edit-form {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .btn--save,
+  .btn--cancel {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+}

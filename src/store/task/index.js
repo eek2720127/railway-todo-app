@@ -1,9 +1,10 @@
+// src/store/task/index.jsx
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { handleThunkError } from '~/utils/handleThunkError'
 import axios from '~/vendor/axios'
 
 const initialState = {
-  tasks: null,
+  tasks: [], // 空配列にしておく（nullだと push で落ちる）
   listId: null,
   isLoading: false,
 }
@@ -13,7 +14,7 @@ export const taskSlice = createSlice({
   initialState,
   reducers: {
     resetTask: (state, _action) => {
-      state.tasks = null
+      state.tasks = [] // null にしない
       state.listId = null
       state.isLoading = false
     },
@@ -27,16 +28,13 @@ export const taskSlice = createSlice({
       state.isLoading = action.payload
     },
     addTask: (state, action) => {
-      const title = action.payload.title
-      const id = action.payload.id
-      const detail = action.payload.detail
-      const done = action.payload.done
-
-      state.tasks.push({ title, id, detail, done })
+      // payload 全体を push（limit があればそのまま入る）
+      if (!state.tasks) state.tasks = []
+      state.tasks.push(action.payload)
     },
     mutateTask: (state, action) => {
       const id = action.payload.id
-      const idx = state.tasks.findIndex((list) => list.id === id)
+      const idx = state.tasks.findIndex((t) => t.id === id)
       if (idx === -1) {
         return
       }
@@ -48,8 +46,7 @@ export const taskSlice = createSlice({
     },
     removeTask: (state, action) => {
       const id = action.payload.id
-
-      state.tasks = state.tasks.filter((list) => list.id !== id)
+      state.tasks = state.tasks.filter((t) => t.id !== id)
     },
   },
 })
@@ -64,6 +61,8 @@ export const {
   removeTask,
 } = taskSlice.actions
 
+// -------------------------
+// fetchTasks（既存）
 export const fetchTasks = createAsyncThunk(
   'task/fetchTasks',
   async ({ force = false } = {}, thunkApi) => {
@@ -93,67 +92,80 @@ export const fetchTasks = createAsyncThunk(
   }
 )
 
+// -------------------------
+// createTask（安全版）
 export const createTask = createAsyncThunk(
   'task/createTask',
   async (payload, thunkApi) => {
     const listId = thunkApi.getState().list.current
-    if (!listId) {
-      return
-    }
+    if (!listId) return
 
     try {
-      const res = await axios.post(`/lists/${listId}/tasks`, payload)
-      const id = res.data.id
+      // API仕様に合わせて body を作る
+      const body = {
+        title: payload.title,
+        detail: payload.detail || '',
+        done: false,
+      }
+      if (payload.limit) body.limit = payload.limit // payload.limit は ISO 形式であることを想定
 
-      thunkApi.dispatch(
-        addTask({
-          ...payload,
-          id,
-        })
-      )
+      const res = await axios.post(`/lists/${listId}/tasks`, body, {
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      // サーバから返ってきた id をマージして reducer に渡す
+      const id = res.data?.id
+      thunkApi.dispatch(addTask({ ...body, ...(id ? { id } : {}) }))
     } catch (e) {
       handleThunkError(e, thunkApi)
+      console.error('createTask error:', e.response?.data || e.message)
     }
   }
 )
 
+// -------------------------
+// updateTask（安全版）
 export const updateTask = createAsyncThunk(
   'task/updateTask',
   async (payload, thunkApi) => {
     const listId = thunkApi.getState().list.current
-    if (!listId) {
-      return
-    }
+    if (!listId) return
 
     const oldValue = thunkApi
       .getState()
-      .task.tasks.find((task) => task.id === payload.id)
-
-    if (!oldValue) {
-      return
-    }
+      .task.tasks.find((t) => t.id === payload.id)
+    if (!oldValue) return
 
     try {
-      await axios.put(`/lists/${listId}/tasks/${payload.id}`, {
-        ...oldValue,
-        ...payload,
+      // API が期待する body の形に整形
+      const body = {
+        title: payload.title,
+        detail: payload.detail || '',
+        done: !!payload.done,
+      }
+      if (payload.limit) body.limit = payload.limit
+
+      await axios.put(`/lists/${listId}/tasks/${payload.id}`, body, {
+        headers: { 'Content-Type': 'application/json' },
       })
+
+      // reducer 更新（payload に limit が含まれている想定）
       thunkApi.dispatch(mutateTask(payload))
     } catch (e) {
       handleThunkError(e, thunkApi)
+      console.error('updateTask error:', e.response?.data || e.message)
     }
   }
 )
 
+// -------------------------
+// deleteTask（既存）
 export const deleteTask = createAsyncThunk(
   'task/deleteTask',
   async (payload, thunkApi) => {
     try {
       const listId = thunkApi.getState().list.current
-      if (!listId) {
-        return
-      }
-
+      if (!listId) return
       await axios.delete(`/lists/${listId}/tasks/${payload.id}`)
       thunkApi.dispatch(removeTask(payload))
     } catch (e) {
@@ -161,3 +173,5 @@ export const deleteTask = createAsyncThunk(
     }
   }
 )
+
+export default taskSlice.reducer
