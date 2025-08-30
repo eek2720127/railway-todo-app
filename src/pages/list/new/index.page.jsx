@@ -1,5 +1,6 @@
+// src/pages/list/new/index.page.jsx
 import React, { useCallback, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { BackButton } from '~/components/BackButton'
 import './index.css'
@@ -12,37 +13,53 @@ const NewList = () => {
   const dispatch = useDispatch()
 
   const [title, setTitle] = useState('')
-
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const onSubmit = useCallback(
-    (event) => {
+    async (event) => {
       event.preventDefault()
+      setErrorMessage('')
+      if (!title.trim()) {
+        setErrorMessage('タイトルは必須です')
+        return
+      }
 
       setIsSubmitting(true)
-
-      void dispatch(createList({ title }))
-        .unwrap()
-        .then((listId) => {
-          dispatch(setCurrentList(listId))
-          navigate(`/`)
-        })
-        .catch((err) => {
-          setErrorMessage(err.message)
-        })
-        .finally(() => {
-          setIsSubmitting(false)
-        })
+      try {
+        // createList は thunk で id を返す想定
+        const listId = await dispatch(
+          createList({ title: title.trim() })
+        ).unwrap()
+        dispatch(setCurrentList(listId))
+        // 作成後はトップへ戻す（必要なら `/lists/${listId}` に移動）
+        navigate(`/`)
+      } catch (err) {
+        // API のエラーメッセージを表示
+        setErrorMessage(err?.message || '作成に失敗しました')
+      } finally {
+        setIsSubmitting(false)
+      }
     },
-    [title]
+    [title, dispatch, navigate]
   )
+
+  const handleCancel = useCallback(() => {
+    // 前のページに戻る。新規作成はモーダル化している場合は onCancel を呼ぶ設計にする
+    navigate(-1)
+  }, [navigate])
 
   return (
     <main className="new_list">
       <BackButton />
-      <h2 className="new_list__title">リスト編集</h2>
-      <p className="new_list__error">{errorMessage}</p>
+      <h2 className="new_list__title">リスト作成</h2>
+
+      {errorMessage && (
+        <p className="new_list__error" role="alert">
+          {errorMessage}
+        </p>
+      )}
+
       <form className="new_list__form" onSubmit={onSubmit}>
         <fieldset className="new_list__form_field">
           <label htmlFor={`${id}-title`} className="new_list__form_label">
@@ -54,15 +71,32 @@ const NewList = () => {
             placeholder="Family"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
+            aria-label="リスト名"
           />
         </fieldset>
+
         <div className="new_list__form_actions">
-          <Link to="/" data-variant="secondary" className="app_button">
-            削除
-          </Link>
-          <div className="new_list__form_actions_spacer"></div>
-          <button type="submit" className="app_button" disabled={isSubmitting}>
-            更新
+          {/* キャンセル（左） */}
+          <button
+            type="button"
+            className="app_button"
+            onClick={handleCancel}
+            aria-label="キャンセルして戻る"
+            disabled={isSubmitting}
+          >
+            キャンセル
+          </button>
+
+          <div className="new_list__form_actions_spacer" />
+
+          {/* 作成（右） */}
+          <button
+            type="submit"
+            className="app_button"
+            disabled={isSubmitting}
+            aria-disabled={isSubmitting}
+          >
+            {isSubmitting ? '作成中...' : '作成'}
           </button>
         </div>
       </form>

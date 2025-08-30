@@ -48,7 +48,6 @@ export const Sidebar = () => {
       setIsCreateOpen(false)
     } catch (err) {
       console.error('createList failed', err)
-      // rethrow or surface error handling inside ListEditForm
       throw err
     }
   }
@@ -78,7 +77,6 @@ export const Sidebar = () => {
                   </li>
                 ))}
 
-                {/* ← ここを Link からボタンに変更 */}
                 <li>
                   <button
                     type="button"
@@ -118,8 +116,10 @@ export const Sidebar = () => {
           ariaLabelledBy="create-list-title"
         >
           <h2 id="create-list-title">リストを作成</h2>
+          {/* ← isNew を渡すのが重要です（新規はキャンセルボタン） */}
           <ListEditForm
             initialTitle=""
+            isNew={true}
             onSave={handleCreateSave}
             onCancel={() => setIsCreateOpen(false)}
           />

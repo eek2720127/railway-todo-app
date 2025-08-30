@@ -27,13 +27,40 @@ const ListEditForm = ({
 
   useEffect(() => {
     setTitle(initialTitle || '')
+    setError(null)
   }, [initialTitle, listId])
+
+  const extractServerMessage = (err) => {
+    // API の返す形は色々あり得るので可能な箇所を順に参照
+    return (
+      err?.ErrorMessageJP ||
+      err?.ErrorMessageEN ||
+      err?.message ||
+      err?.response?.data?.ErrorMessageJP ||
+      err?.response?.data?.ErrorMessageEN ||
+      err?.response?.data?.message ||
+      null
+    )
+  }
+
+  const translateMessage = (msg) => {
+    if (!msg) return null
+    // 既知の英語メッセージを日本語に変換（必要なら追加）
+    if (msg === 'This list is not reviewed yet.') {
+      return 'このリストはまだレビューされていないため、操作できません（APIの制約）'
+    }
+    if (msg === 'validation error') {
+      return '入力に誤りがあります。内容を確認してください。'
+    }
+    // デフォルトはそのまま表示
+    return msg
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
     if (!title.trim()) {
-      alert('タイトルは必須です')
+      setError('タイトルは必須です')
       return
     }
 
@@ -46,10 +73,14 @@ const ListEditForm = ({
 
     try {
       setLoading(true)
+      // 親の onSave が thunk を呼んで reject するとここで catch される
       await onSave(payload)
+      // 成功したら parent がモーダルを閉じる設計なのでここでは何もしない
     } catch (err) {
+      const serverMsg = extractServerMessage(err)
+      const translated = translateMessage(serverMsg) || '保存に失敗しました'
       console.error('ListEditForm onSave error:', err)
-      setError(err?.message || '保存に失敗しました')
+      setError(translated)
     } finally {
       setLoading(false)
     }
@@ -69,9 +100,12 @@ const ListEditForm = ({
     setLoading(true)
     try {
       await onDelete(listId)
+      // parent は成功時にモーダルを閉じたり遷移したりする想定
     } catch (err) {
+      const serverMsg = extractServerMessage(err)
+      const translated = translateMessage(serverMsg) || '削除に失敗しました'
       console.error('ListEditForm onDelete error:', err)
-      setError(err?.message || '削除に失敗しました')
+      setError(translated)
     } finally {
       setLoading(false)
     }
@@ -80,15 +114,15 @@ const ListEditForm = ({
   return (
     <form onSubmit={handleSubmit} className="list-edit-form">
       <TextField
-        label="リスト名"
+        label="タスク名"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="リスト名を入力"
+        placeholder="タスク名を入力"
         required
       />
 
       {error && (
-        <div className="error" role="alert">
+        <div className="list-edit-error" role="alert" style={{ marginTop: 8 }}>
           {error}
         </div>
       )}
@@ -97,7 +131,13 @@ const ListEditForm = ({
         style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}
       >
         <Button type="submit" variant="primary" disabled={loading}>
-          {loading ? '保存中...' : isNew ? 'Create' : 'Update'}
+          {loading
+            ? isNew
+              ? '処理中...'
+              : '処理中...'
+            : isNew
+              ? '作成'
+              : '更新'}
         </Button>
 
         <div style={{ marginLeft: 'auto' }}>
