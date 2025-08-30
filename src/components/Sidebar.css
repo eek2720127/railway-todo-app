@@ -126,3 +126,31 @@
 .sidebar__login {
   margin-top: 1.5rem;
 }
+
+/* responsive-fix.css — コピーしてプロジェクトの CSS に追加してください */
+@media (max-width: 768px) {
+  /* メインコンテンツの左余白をリセット */
+  .tasks_list,
+  .app_main,
+  .main_content,
+  .page_container {
+    /* プロジェクトで使っているクラス名を含めておく */
+    margin-left: 0 !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* もし .sidebar が display:none で隠れているなら aria-hidden を true にしているか確認。
+     無ければ強制的に非表示 */
+  .sidebar {
+    display: none !important;
+  }
+
+  /* ハンバーガーボタンの位置確保（必要なら） */
+  .sidebar__hamburger {
+    display: flex !important;
+    z-index: 1300;
+  }
+}
